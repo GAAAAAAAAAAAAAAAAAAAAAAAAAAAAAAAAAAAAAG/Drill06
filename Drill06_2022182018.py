@@ -21,7 +21,7 @@ def handle_events():
         elif event.type == SDL_KEYDOWN and event.key == SDLK_ESCAPE:
             running = False
         elif event.type == SDL_MOUSEBUTTONDOWN:
-            x, y = event.x, TUK_HEIGHT -1 -event.y
+
             target_positions.append((event.x, TUK_HEIGHT - 1 - event.y))
     pass
 
@@ -46,6 +46,7 @@ running = True
 x, y = TUK_WIDTH // 2, TUK_HEIGHT // 2
 target_positions = []
 frame = 0
+
 direction = 0
 
 while running:
@@ -53,9 +54,6 @@ while running:
     TUK_ground.draw(TUK_WIDTH // 2, TUK_HEIGHT // 2)
 
     move_towards_target()
-
-    for hx, hy in target_positions:
-        hand_arrow.draw(hx,hy)
 
     if target_positions:
         hand_arrow.draw(target_positions[0][0],target_positions[0][1])
