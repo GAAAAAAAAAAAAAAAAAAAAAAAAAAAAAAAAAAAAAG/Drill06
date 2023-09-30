@@ -21,8 +21,7 @@ def handle_events():
         elif event.type == SDL_KEYDOWN and event.key == SDLK_ESCAPE:
             running = False
         elif event.type == SDL_MOUSEBUTTONDOWN:
-
-            target_positions.append((event.x, TUK_HEIGHT - 1 - event.y))
+            target_positions.append({'position': (event.x, TUK_HEIGHT - 1 - event.y), 'reached': False})
     pass
 
 def move_towards_target():
@@ -30,7 +29,8 @@ def move_towards_target():
     speed = 2
 
     if target_positions:
-        target_x, target_y = target_positions[0]
+        target = target_positions[0]
+        target_x, target_y = target['position']
         distance = math.sqrt((target_x - x) ** 2 + (target_y - y) ** 2)
 
         if distance > speed:
@@ -40,13 +40,12 @@ def move_towards_target():
             direction = 1 if target_x > x else 0
         else:
             x, y = target_x, target_y
-            target_positions.pop(0)
+            target['reached'] = True
 
 running = True
 x, y = TUK_WIDTH // 2, TUK_HEIGHT // 2
 target_positions = []
 frame = 0
-
 direction = 0
 
 while running:
@@ -55,8 +54,11 @@ while running:
 
     move_towards_target()
 
-    if target_positions:
-        hand_arrow.draw(target_positions[0][0],target_positions[0][1])
+    for target in target_positions:
+        if not target['reached']:
+            hand_arrow.draw(target['position'][0], target['position'][1])
+
+    target_positions = [target for target in target_positions if not target['reached']]
 
     if direction == 1:
         character.clip_draw(frame * 65, 0, 65, 45, x, y, 100, 100)
@@ -69,7 +71,3 @@ while running:
     handle_events()
 
 close_canvas()
-
-
-
-
