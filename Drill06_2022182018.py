@@ -11,7 +11,7 @@ hand_arrow = load_image('hand_arrow.png')
 
 
 def handle_events():
-    global direction
+    global target_positions
     global running
     global x, y
     events = get_events()
@@ -20,26 +20,32 @@ def handle_events():
             running = False
         elif event.type == SDL_KEYDOWN and event.key == SDLK_ESCAPE:
             running = False
+        elif event.type == SDL_MOUSEBUTTONDOWN:
+            x, y = event.x, TUK_HEIGHT -1 -event.y
+            target_positions.append((event.x, TUK_HEIGHT - 1 - event.y))
     pass
 
 def move_towards_target():
     global x, y, target_x, target_y, direction
     speed = 2
-    distance = math.sqrt((target_x - x) ** 2 + (target_y - y) ** 2)
-    if distance > speed:
-        angle = math.atan2(target_y - y, target_x - x)
-        x += speed * math.cos(angle)
-        y += speed * math.sin(angle)
-        direction = 1 if target_x > x else 0
-    else:
-        x, y = target_x, target_y
-        target_x, target_y = random.randint(0, TUK_WIDTH), random.randint(0, TUK_HEIGHT)
+
+    if target_positions:
+        target_x, target_y = target_positions[0]
+        distance = math.sqrt((target_x - x) ** 2 + (target_y - y) ** 2)
+
+        if distance > speed:
+            angle = math.atan2(target_y - y, target_x - x)
+            x += speed * math.cos(angle)
+            y += speed * math.sin(angle)
+            direction = 1 if target_x > x else 0
+        else:
+            x, y = target_x, target_y
+            target_positions.pop(0)
 
 running = True
 x, y = TUK_WIDTH // 2, TUK_HEIGHT // 2
-target_x, target_y = random.randint(0, TUK_WIDTH), random.randint(0, TUK_HEIGHT)
+target_positions = []
 frame = 0
-hide_cursor()
 direction = 0
 
 while running:
@@ -48,12 +54,16 @@ while running:
 
     move_towards_target()
 
+    for hx, hy in target_positions:
+        hand_arrow.draw(hx,hy)
+
+    if target_positions:
+        hand_arrow.draw(target_positions[0][0],target_positions[0][1])
+
     if direction == 1:
         character.clip_draw(frame * 65, 0, 65, 45, x, y, 100, 100)
     elif direction == 0:
         character.clip_composite_draw(frame * 65, 0, 65, 45, 0, 'h', x, y, 100, 100)
-
-    hand_arrow.draw(target_x, target_y)
 
     update_canvas()
     frame = (frame +1) % 8
